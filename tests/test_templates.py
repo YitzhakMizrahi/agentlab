@@ -1,4 +1,4 @@
-from agentlab.utils.templates import render_template, render_mapping
+from agentlab.utils.templates import render_mapping, render_template
 
 
 def test_render_template_basic():
@@ -13,5 +13,3 @@ def test_render_mapping_nested():
     data = {"a": "{{x}}", "b": {"c": "{{y}}"}, "d": ["{{x}}", 1, {"e": "{{y}}"}]}
     out = render_mapping(data, {"x": "X", "y": "Y"})
     assert out == {"a": "X", "b": {"c": "Y"}, "d": ["X", 1, {"e": "Y"}]}
-
-
