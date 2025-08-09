@@ -39,6 +39,15 @@ plan:
         """.strip()
     )
     bp = load_blueprint(bp_path)
+
+    # Stub LLM to avoid real network calls in CI
+    async def fake_acomplete(prompt: str, **_):
+        return "ok"
+
+    import agentlab.runner as R
+
+    monkeypatch.setattr(R, "acomplete", fake_acomplete)
+
     out = run_agent(bp, input_text="unused")
     assert out["agent"] == "math-agent"
     assert any("[add] 5" in c for c in out["tool_context"])  # tool result recorded
