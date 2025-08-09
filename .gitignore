@@ -20,6 +20,10 @@ build/
 # Project outputs
 outputs/
 
+# Test reports
+junit.xml
+reports/**/*.xml
+
 # Python
 __pycache__/
 *.py[cod]
