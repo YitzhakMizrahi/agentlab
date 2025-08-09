@@ -44,11 +44,22 @@ def _evaluate_checks(
     return False
 
 
-def run_evaluations(blueprint: Blueprint, model_name: str = "qwen3:8b") -> Dict[str, Any]:
+def run_evaluations(
+    blueprint: Blueprint,
+    model_name: str = "qwen3:8b",
+    strip_think: bool = True,
+    junit_path: str | None = None,
+) -> Dict[str, Any]:
     results: List[Dict[str, Any]] = []
     passed = 0
     for case in blueprint.evaluation:
-        outcome = run_agent(blueprint, input_text=case.input, model_name=model_name)
+        extra: Dict[str, Any] = {"strip_think": strip_think}
+        outcome = run_agent(
+            blueprint,
+            input_text=case.input,
+            model_name=model_name,
+            **extra,
+        )
         output = (outcome.get("output") or "").strip()
         ok = _evaluate_checks(output, case.checks, case.expected)
         results.append(
@@ -62,9 +73,33 @@ def run_evaluations(blueprint: Blueprint, model_name: str = "qwen3:8b") -> Dict[
         )
         if ok:
             passed += 1
-    return {
+    summary = {
         "agent": blueprint.name,
         "total": len(blueprint.evaluation),
         "passed": passed,
         "results": results,
     }
+    if junit_path:
+        try:
+            _write_junit(junit_path, blueprint.name, results)
+        except Exception:
+            pass
+    return summary
+
+
+def _write_junit(path: str, suite_name: str, results: List[Dict[str, Any]]) -> None:
+    # Minimal JUnit XML
+    import xml.etree.ElementTree as ET
+
+    tests = len(results)
+    failures = sum(1 for r in results if not r.get("pass"))
+    suite = ET.Element("testsuite", name=suite_name, tests=str(tests), failures=str(failures))
+    for idx, r in enumerate(results, start=1):
+        case = ET.SubElement(suite, "testcase", name=f"case_{idx}")
+        if not r.get("pass"):
+            fail = ET.SubElement(case, "failure", message="check_failed")
+            fail.text = f"expected={r.get('expected_substring') or r.get('checks')} actual={r.get('actual')}"
+    tree = ET.ElementTree(suite)
+    if hasattr(ET, "indent"):
+        ET.indent(tree)
+    tree.write(path, encoding="utf-8", xml_declaration=True)
