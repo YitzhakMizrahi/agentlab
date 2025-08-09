@@ -4,7 +4,7 @@ from agentlab.evaluator import run_evaluations
 
 def _bp_for_output(text: str) -> Blueprint:
     # A blueprint that returns a fixed output via monkeypatched LLM will be provided by the test
-    return Blueprint(name="t", plan=[{"step": "generate"}], evaluation=[])
+    return Blueprint(name="t", plan=[{"step": "generate", "name": "final"}], evaluation=[])
 
 
 def test_evaluator_contains_regex_anyof(monkeypatch):
