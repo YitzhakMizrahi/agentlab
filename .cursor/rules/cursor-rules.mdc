@@ -7,3 +7,12 @@ alwaysApply: true
 - Keep the CLI UX crisp with `typer` and `rich`.
 - Add unit tests as we extend features.
 - When unsure, write a short design note before coding.
+- Prefer Ruff for lint/format; avoid adding Black hooks. Configure via `[tool.ruff]` and `[tool.ruff.lint]` in `pyproject.toml`.
+- Use Pydantic field aliases to avoid reserved keywords (e.g., `with_` alias `with`).
+- For plugin discovery, use `importlib.metadata.entry_points()` and handle both APIs:
+  - New: `eps.select(group=...)`
+  - Old: `entry_points().get(group, [])`
+- Keep runner tool discovery modular: call `load_default_tools()` and `load_plugin_tools()` before executing `tool_use` steps.
+- Write tests that monkeypatch entry point discovery; don't rely on real installed plugins.
+- CLI must accept `--stream` and default non-stream runs; use `rich.live` sparingly to avoid log noise.
+- Add new files with conventional commits and separate commits per file when practical.
