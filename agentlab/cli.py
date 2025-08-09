@@ -31,6 +31,9 @@ def run(
     top_p: float = typer.Option(1.0, "--top-p", help="LLM top-p (default 1)"),
     model: str = typer.Option("qwen3:8b", "--model", help="Ollama model name"),
     stream: bool = typer.Option(False, "--stream", help="Stream output from LLM if supported"),
+    strip_think: bool = typer.Option(
+        False, "--strip-think", help="Strip <think> tags from outputs"
+    ),
 ):
     """Run a single agent from a blueprint."""
     bp = load_blueprint(blueprint)
@@ -50,6 +53,7 @@ def run(
                 model_name=model,
                 stream=True,
                 generation_kwargs={"temperature": temperature, "top_p": top_p},
+                strip_think=strip_think,
             )
             live.update(Panel.fit("[bold]Result[/bold]"))
             print(json.dumps(result, indent=2, ensure_ascii=False))
@@ -60,6 +64,7 @@ def run(
             model_name=model,
             stream=False,
             generation_kwargs={"temperature": temperature, "top_p": top_p},
+            strip_think=strip_think,
         )
         console.print(Panel.fit("[bold]Result[/bold]"))
         print(json.dumps(result, indent=2, ensure_ascii=False))
@@ -69,10 +74,15 @@ def run(
 def eval(
     blueprint: Path = typer.Argument(..., exists=True, help="Path to agent blueprint YAML"),
     model: str = typer.Option("qwen3:8b", "--model", help="Ollama model name"),
+    junit: Path = typer.Option(None, "--junit", help="Optional JUnit XML output path"),
+    no_strip_think: bool = typer.Option(
+        False, "--no-strip-think", help="Do not strip <think> tags from outputs"
+    ),
 ):
     """Run the blueprint's evaluation cases and report pass/fail."""
     bp = load_blueprint(blueprint)
-    summary = run_evaluations(bp, model_name=model)
+    # Positional call keeps typing simple across mypy versions
+    summary = run_evaluations(bp, model, not no_strip_think, str(junit) if junit else None)
     console.print(Panel.fit("[bold]Evaluation Summary[/bold]"))
     print(json.dumps(summary, indent=2, ensure_ascii=False))
 
