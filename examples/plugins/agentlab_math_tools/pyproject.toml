@@ -12,4 +12,7 @@ requires-python = ">=3.10"
 [project.entry-points."agentlab.tools"]
 agentlab_math_tools = "agentlab_math_tools.tools:get_tools"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["agentlab_math_tools*"]
 
