@@ -56,9 +56,23 @@ def load_plugin_tools(entry_point_group: str = "agentlab.tools") -> None:
             obj = ep.load()
         except Exception:
             continue
+        # Case 1: entry point directly exposes a mapping name->callable
         if isinstance(obj, dict):
             for name, fn in obj.items():
                 if callable(fn):
                     register_tool(str(name), fn)
-        elif callable(obj):
-            register_tool(str(ep.name), obj)
+            continue
+        # Case 2: entry point is a callable; it may itself be a tool, or a factory returning a mapping
+        if callable(obj):
+            try:
+                produced = obj()  # try zero-arg call to detect factory pattern
+            except TypeError:
+                produced = None
+            except Exception:
+                produced = None
+            if isinstance(produced, dict):
+                for name, fn in produced.items():
+                    if callable(fn):
+                        register_tool(str(name), fn)
+            else:
+                register_tool(str(ep.name), obj)
