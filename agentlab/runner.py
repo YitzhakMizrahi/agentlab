@@ -44,6 +44,7 @@ def run_agent(
     model_name: str = "qwen3:8b",
     stream: bool = False,
     generation_kwargs: Optional[Dict[str, Any]] = None,
+    strip_think: bool = False,
 ) -> Dict[str, Any]:
     """Execute the plan with simple semantics: tool_use steps populate tool_context; generate creates final answer."""
     tool_contexts: List[str] = []
@@ -107,8 +108,9 @@ def run_agent(
                         **(generation_kwargs or {}),
                     )
                 )
-            # Strip <think>...</think> markup if present
-            text = re.sub(r"<think>[\s\S]*?</think>", "", text).strip()
+            # Strip <think>...</think> markup if requested
+            if strip_think:
+                text = re.sub(r"<think>[\s\S]*?</think>", "", text).strip()
             return {
                 "agent": blueprint.name,
                 "input": input_text or "",
