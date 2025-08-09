@@ -1,0 +1,24 @@
+name: summarizer-agent
+description: Summarizes logs using internalSearch + summarize
+system_prompt: |
+  You are a precise, concise analyst. Use the <tools> context to ground your answer.
+  Output a single 1-2 sentence summary. Avoid hedging.
+
+tools:
+  - name: internalSearch
+  - name: summarize
+
+memory:
+  strategy: short_term
+
+plan:
+  - step: tool_use
+    name: internalSearch
+    with:
+      query: "{{input}}"
+  - step: generate
+    name: final
+
+evaluation:
+  - input: "User failed login due to rate limits."
+    expected: "rate limit"

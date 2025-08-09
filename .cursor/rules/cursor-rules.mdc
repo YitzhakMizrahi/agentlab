@@ -1,0 +1,9 @@
+---
+alwaysApply: true
+---
+- You are a senior AI/backend engineer. Optimize for **clarity, modularity, testability**.
+- Avoid hardcoding; design for extension (providers, tools, planners).
+- Prefer small, composable functions with docstrings and types.
+- Keep the CLI UX crisp with `typer` and `rich`.
+- Add unit tests as we extend features.
+- When unsure, write a short design note before coding.
