@@ -3,29 +3,24 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Optional
 from .config_loader import Blueprint, PlanStep
-from .mocks.tool_mocks import MOCK_REGISTRY
+from .tools.registry import get_tool, load_default_tools
+from .utils.templates import render_mapping
 import asyncio
 from .llm.ollama_client import acomplete
 
 
 def _render_prompt(system: str, user: str, tool_context: str | None = None) -> str:
-    parts: List[str] = [f"<system>
-{system}
-</system>"]
+    parts: List[str] = [f"<system>\n{system}\n</system>"]
     if tool_context:
-        parts.append(f"<tools>
-{tool_context}
-</tools>")
-    parts.append(f"<user>
-{user}
-</user>")
-    return "
-
-".join(parts)
+        parts.append(f"<tools>\n{tool_context}\n</tools>")
+    parts.append(f"<user>\n{user}\n</user>")
+    return "\n\n".join(parts)
 
 
 def _execute_tool(name: str, args: Dict[str, Any] | None) -> str:
-    fn = MOCK_REGISTRY.get(name)
+    # Ensure default tools are available
+    load_default_tools()
+    fn = get_tool(name)
     if not fn:
         return f"[tool-error] Unknown tool: {name}"
     args = args or {}
@@ -50,17 +45,17 @@ def run_agent(
 
     for step in blueprint.plan:
         if step.kind == "tool_use":
-            output = _execute_tool(step.name or "", step.with or {"input": user_input})
+            rendered_args = render_mapping(step.with_ or {"input": user_input}, {"input": user_input})
+            output = _execute_tool(step.name or "", rendered_args)
             tool_contexts.append(f"[{step.name}] {output}")
         elif step.kind == "note":
-            tool_contexts.append(f"[note] {step.with or ''}")
+            tool_contexts.append(f"[note] {step.with_ or ''}")
         elif step.kind == "generate":
             # Single LLM generation; include prior tool contexts
             prompt = _render_prompt(
                 blueprint.system_prompt,
                 user_input,
-                tool_context="
-".join(tool_contexts) if tool_contexts else None,
+                tool_context="\n".join(tool_contexts) if tool_contexts else None,
             )
             text = asyncio.run(acomplete(prompt=prompt, model=model_name, stream=stream))
             return {
