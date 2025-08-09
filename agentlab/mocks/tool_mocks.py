@@ -1,9 +1,11 @@
 ## agentlab/mocks/tool_mocks.py
 
 from __future__ import annotations
-from typing import Dict, Any
+
+from typing import Any, Dict
 
 # Add simple deterministic mocks to keep agent runs testable
+
 
 def internalSearch(query: str) -> str:
     # In real life, this would hit a vector store. For now, return a canned snippet.
