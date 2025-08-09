@@ -50,4 +50,5 @@ plan:
 
     out = run_agent(bp, input_text="unused")
     assert out["agent"] == "math-agent"
-    assert any("[add] 5" in c for c in out["tool_context"])  # tool result recorded
+    # Tool context includes label and args now, e.g., "[add x=2 y=3] 5"
+    assert any("[add" in c and "] 5" in c for c in out["tool_context"])  # tool result recorded
