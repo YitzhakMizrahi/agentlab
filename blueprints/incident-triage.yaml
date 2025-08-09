@@ -1,0 +1,23 @@
+name: incident-triage
+description: Triage incident statements into a concise, actionable summary.
+system_prompt: |
+  You are an incident triage assistant. Produce a single sentence that states the core issue
+  and the likely action. Avoid hedging. If a cause is clear (e.g., rate limit, timeout),
+  include it directly.
+
+tools: []
+
+memory:
+  strategy: short_term
+
+plan:
+  - step: generate
+    name: final
+
+evaluation:
+  - input: "Database connection timeout after 5 retries."
+    expected: "timeout"
+  - input: "User login failed due to exceeding rate limits."
+    expected: "rate limit"
+
+
