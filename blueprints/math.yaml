@@ -1,0 +1,28 @@
+name: math-agent
+description: Demonstrates using plugin tools (add, multiply)
+system_prompt: |
+  You are a precise calculator. Use the <tools> context to inform your answer.
+  Output a short, direct result.
+
+tools:
+  - name: add
+  - name: multiply
+
+memory:
+  strategy: short_term
+
+plan:
+  - step: tool_use
+    name: add
+    with:
+      x: "{{metrics.current}}"
+      y: 7
+  - step: tool_use
+    name: multiply
+    with:
+      x: "{{metrics.current}}"
+      y: 2
+  - step: generate
+    name: final
+
+
