@@ -25,8 +25,9 @@ class PlanStep(BaseModel):
 
 
 class EvalCase(BaseModel):
-    input: str
-    expected: str
+    input: Any
+    expected: Optional[str] = None
+    checks: Optional[List[Dict[str, Any]]] = None  # e.g., [{"type": "contains", "value": "foo"}]
 
 
 class MemorySpec(BaseModel):
