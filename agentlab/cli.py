@@ -27,6 +27,8 @@ def run(
         None, "--input-json", help="JSON string payload to pass to agent"
     ),
     input_file: Path = typer.Option(None, "--input-file", help="Path to JSON file payload"),
+    temperature: float = typer.Option(0.0, "--temperature", help="LLM temperature (default 0)"),
+    top_p: float = typer.Option(1.0, "--top-p", help="LLM top-p (default 1)"),
     model: str = typer.Option("qwen3:8b", "--model", help="Ollama model name"),
     stream: bool = typer.Option(False, "--stream", help="Stream output from LLM if supported"),
 ):
@@ -42,11 +44,23 @@ def run(
         # Display incremental output while the agent runs
         with Live(refresh_per_second=8, console=console) as live:
             # Run once; our run_agent handles streaming accumulation
-            result = run_agent(bp, input_text=payload, model_name=model, stream=True)
+            result = run_agent(
+                bp,
+                input_text=payload,
+                model_name=model,
+                stream=True,
+                generation_kwargs={"temperature": temperature, "top_p": top_p},
+            )
             live.update(Panel.fit("[bold]Result[/bold]"))
             print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
-        result = run_agent(bp, input_text=payload, model_name=model, stream=False)
+        result = run_agent(
+            bp,
+            input_text=payload,
+            model_name=model,
+            stream=False,
+            generation_kwargs={"temperature": temperature, "top_p": top_p},
+        )
         console.print(Panel.fit("[bold]Result[/bold]"))
         print(json.dumps(result, indent=2, ensure_ascii=False))
 

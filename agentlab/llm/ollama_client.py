@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any, Callable, Dict, Optional
 
 import httpx
 
-OLLAMA_URL = "http://localhost:11434"
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+TEST_MODE = os.getenv("AGENTLAB_TEST_MODE") == "1"
+DEFAULT_TEST_RESPONSE = "OK: test-mode response"
 
 
 async def acomplete(
@@ -17,7 +20,16 @@ async def acomplete(
     on_token: Optional[Callable[[str], None]] = None,
     **kwargs: Any,
 ) -> str:
-    payload: Dict[str, Any] = {"model": model, "prompt": prompt, "stream": bool(stream)}
+    if TEST_MODE:
+        return DEFAULT_TEST_RESPONSE
+
+    payload: Dict[str, Any] = {
+        "model": model,
+        "prompt": prompt,
+        "stream": bool(stream),
+        "temperature": 0,
+        "top_p": 1,
+    }
     payload.update(kwargs)
     _client = client or httpx.AsyncClient(timeout=60)
     try:

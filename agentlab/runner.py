@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from typing import Any, Dict, List, Optional, Union
 
 import orjson
@@ -42,6 +43,7 @@ def run_agent(
     input_text: Optional[Union[str, Dict[str, Any]]] = None,
     model_name: str = "qwen3:8b",
     stream: bool = False,
+    generation_kwargs: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Execute the plan with simple semantics: tool_use steps populate tool_context; generate creates final answer."""
     tool_contexts: List[str] = []
@@ -87,11 +89,26 @@ def run_agent(
                     fragments.append(tok)
 
                 asyncio.run(
-                    acomplete(prompt=prompt, model=model_name, stream=True, on_token=_on_tok)
+                    acomplete(
+                        prompt=prompt,
+                        model=model_name,
+                        stream=True,
+                        on_token=_on_tok,
+                        **(generation_kwargs or {}),
+                    )
                 )
                 text = "".join(fragments)
             else:
-                text = asyncio.run(acomplete(prompt=prompt, model=model_name, stream=False))
+                text = asyncio.run(
+                    acomplete(
+                        prompt=prompt,
+                        model=model_name,
+                        stream=False,
+                        **(generation_kwargs or {}),
+                    )
+                )
+            # Strip <think>...</think> markup if present
+            text = re.sub(r"<think>[\s\S]*?</think>", "", text).strip()
             return {
                 "agent": blueprint.name,
                 "input": input_text or "",
