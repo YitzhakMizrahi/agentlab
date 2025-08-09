@@ -26,3 +26,13 @@ agentlab = "agentlab.cli:app"
 [tool.setuptools.packages.find]
 include = ["agentlab*"]
 exclude = ["tests*", "outputs*", "blueprints*"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+extend-select = ["I"]
