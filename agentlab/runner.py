@@ -9,7 +9,7 @@ import orjson
 
 from .config_loader import Blueprint
 from .llm.ollama_client import acomplete
-from .tools.registry import get_tool, load_default_tools
+from .tools.registry import get_tool, load_default_tools, load_plugin_tools
 from .utils.templates import render_mapping
 
 
@@ -56,15 +56,14 @@ def run_agent(
         variables = {"input": input_text or ""}
         user_input_str = input_text or ""
 
+    # Load plugin tools once per run
+    try:
+        load_plugin_tools()
+    except Exception:
+        pass
+
     for step in blueprint.plan:
         if step.kind == "tool_use":
-            # Ensure plugin tools are discoverable each run (lazy import to avoid mypy attr issues)
-            try:
-                from .tools.registry import load_plugin_tools as _load_plugin_tools
-
-                _load_plugin_tools()
-            except Exception:
-                pass
             rendered_args = render_mapping(step.with_ or {"input": user_input_str}, variables)
             output = _execute_tool(step.name or "", rendered_args)
             tool_contexts.append(f"[{step.name}] {output}")
