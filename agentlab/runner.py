@@ -66,7 +66,11 @@ def run_agent(
         if step.kind == "tool_use":
             rendered_args = render_mapping(step.with_ or {"input": user_input_str}, variables)
             output = _execute_tool(step.name or "", rendered_args)
-            tool_contexts.append(f"[{step.name}] {output}")
+            label = step.name or "tool"
+            args_str = (
+                " ".join(f"{k}={v}" for k, v in rendered_args.items()) if rendered_args else ""
+            )
+            tool_contexts.append(f"[{label}{(' ' + args_str) if args_str else ''}] {output}")
         elif step.kind == "note":
             tool_contexts.append(f"[note] {step.with_ or ''}")
         elif step.kind == "generate":
