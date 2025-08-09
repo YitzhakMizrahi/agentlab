@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentlab-math-tools"
+version = "0.1.0"
+description = "Example plugin package for AgentLab tools"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.entry-points."agentlab.tools"]
+agentlab_math_tools = "agentlab_math_tools.tools:get_tools"
+
+
