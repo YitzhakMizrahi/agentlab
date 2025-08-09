@@ -1,8 +1,10 @@
 ## agentlab/config_loader.py
 
 from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Literal, Optional, Dict, Any
+from typing import Any, Dict, List, Literal, Optional
+
 import yaml
 from pydantic import BaseModel, Field, ValidationError
 
