@@ -12,5 +12,5 @@ def test_strip_think(monkeypatch):
 
     monkeypatch.setattr(R, "acomplete", fake_acomplete)
 
-    out = run_agent(bp, input_text="x")
+    out = run_agent(bp, input_text="x", strip_think=True)
     assert out["output"] == "Visible"
