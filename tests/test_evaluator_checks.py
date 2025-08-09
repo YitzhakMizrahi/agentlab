@@ -1,10 +1,11 @@
-from agentlab.config_loader import Blueprint, PlanStep
+from agentlab.config_loader import Blueprint
 from agentlab.evaluator import run_evaluations
 
 
 def _bp_for_output(text: str) -> Blueprint:
-    # A blueprint that returns a fixed output via monkeypatched LLM will be provided by the test
-    return Blueprint(name="t", plan=[PlanStep(kind="generate", name="final")], evaluation=[])
+    # Build via dict + model_validate to avoid mypy call-arg noise while keeping runtime schema
+    data = {"name": "t", "plan": [{"step": "generate", "name": "final"}], "evaluation": []}
+    return Blueprint.model_validate(data)
 
 
 def test_evaluator_contains_regex_anyof(monkeypatch):
