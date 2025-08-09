@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Dict, Any, List, Optional
-
+from typing import Any, Callable, Dict, List, Optional
 
 ToolFunction = Callable[..., Any]
 
@@ -32,5 +31,3 @@ def load_default_tools() -> None:
     # Register/mock tools dynamically from the mock registry
     for name, fn in tool_mocks.MOCK_REGISTRY.items():
         register_tool(name, fn)
-
-
