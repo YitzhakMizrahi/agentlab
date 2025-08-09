@@ -26,7 +26,7 @@ def run(
     """Run a single agent from a blueprint."""
     bp = load_blueprint(blueprint)
     result = run_agent(bp, input_text=input_text, model_name=model, stream=stream)
-    console.print(Panel.fit("[bold]Result[/bold]", expand=False))
+    console.print(Panel.fit("[bold]Result[/bold]"))
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
@@ -38,7 +38,7 @@ def eval(
     """Run the blueprint's evaluation cases and report pass/fail."""
     bp = load_blueprint(blueprint)
     summary = run_evaluations(bp, model_name=model)
-    console.print(Panel.fit("[bold]Evaluation Summary[/bold]", expand=False))
+    console.print(Panel.fit("[bold]Evaluation Summary[/bold]"))
     print(json.dumps(summary, indent=2, ensure_ascii=False))
 
 
