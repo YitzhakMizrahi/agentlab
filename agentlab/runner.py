@@ -1,12 +1,14 @@
 ## agentlab/runner.py
 
 from __future__ import annotations
+
+import asyncio
 from typing import Any, Dict, List, Optional
-from .config_loader import Blueprint, PlanStep
+
+from .config_loader import Blueprint
+from .llm.ollama_client import acomplete
 from .tools.registry import get_tool, load_default_tools
 from .utils.templates import render_mapping
-import asyncio
-from .llm.ollama_client import acomplete
 
 
 def _render_prompt(system: str, user: str, tool_context: str | None = None) -> str:
@@ -45,7 +47,9 @@ def run_agent(
 
     for step in blueprint.plan:
         if step.kind == "tool_use":
-            rendered_args = render_mapping(step.with_ or {"input": user_input}, {"input": user_input})
+            rendered_args = render_mapping(
+                step.with_ or {"input": user_input}, {"input": user_input}
+            )
             output = _execute_tool(step.name or "", rendered_args)
             tool_contexts.append(f"[{step.name}] {output}")
         elif step.kind == "note":
@@ -57,7 +61,18 @@ def run_agent(
                 user_input,
                 tool_context="\n".join(tool_contexts) if tool_contexts else None,
             )
-            text = asyncio.run(acomplete(prompt=prompt, model=model_name, stream=stream))
+            if stream:
+                fragments: List[str] = []
+
+                def _on_tok(tok: str) -> None:
+                    fragments.append(tok)
+
+                asyncio.run(
+                    acomplete(prompt=prompt, model=model_name, stream=True, on_token=_on_tok)
+                )
+                text = "".join(fragments)
+            else:
+                text = asyncio.run(acomplete(prompt=prompt, model=model_name, stream=False))
             return {
                 "agent": blueprint.name,
                 "input": user_input,
