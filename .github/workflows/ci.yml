@@ -31,4 +31,13 @@ jobs:
           OLLAMA_URL: "http://127.0.0.1:9"
           PYTHONWARNINGS: "error::DeprecationWarning"
         run: python -m pytest -q
+      - name: Upload JUnit (if present)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-reports
+          path: |
+            junit.xml
+            reports/**/*.xml
+          if-no-files-found: ignore
 
