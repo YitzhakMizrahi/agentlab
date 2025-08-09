@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+
+import orjson
 
 from .config_loader import Blueprint
 from .llm.ollama_client import acomplete
@@ -37,13 +39,22 @@ def _execute_tool(name: str, args: Dict[str, Any] | None) -> str:
 
 def run_agent(
     blueprint: Blueprint,
-    input_text: Optional[str] = None,
+    input_text: Optional[Union[str, Dict[str, Any]]] = None,
     model_name: str = "qwen3:8b",
     stream: bool = False,
 ) -> Dict[str, Any]:
     """Execute the plan with simple semantics: tool_use steps populate tool_context; generate creates final answer."""
     tool_contexts: List[str] = []
-    user_input = input_text or ""
+    # Normalize input for templating and user prompt
+    if isinstance(input_text, dict):
+        variables: Dict[str, Any] = input_text
+        try:
+            user_input_str = orjson.dumps(input_text).decode()
+        except Exception:
+            user_input_str = str(input_text)
+    else:
+        variables = {"input": input_text or ""}
+        user_input_str = input_text or ""
 
     for step in blueprint.plan:
         if step.kind == "tool_use":
@@ -54,9 +65,7 @@ def run_agent(
                 _load_plugin_tools()
             except Exception:
                 pass
-            rendered_args = render_mapping(
-                step.with_ or {"input": user_input}, {"input": user_input}
-            )
+            rendered_args = render_mapping(step.with_ or {"input": user_input_str}, variables)
             output = _execute_tool(step.name or "", rendered_args)
             tool_contexts.append(f"[{step.name}] {output}")
         elif step.kind == "note":
@@ -65,7 +74,7 @@ def run_agent(
             # Single LLM generation; include prior tool contexts
             prompt = _render_prompt(
                 blueprint.system_prompt,
-                user_input,
+                user_input_str,
                 tool_context="\n".join(tool_contexts) if tool_contexts else None,
             )
             if stream:
@@ -82,7 +91,7 @@ def run_agent(
                 text = asyncio.run(acomplete(prompt=prompt, model=model_name, stream=False))
             return {
                 "agent": blueprint.name,
-                "input": user_input,
+                "input": input_text or "",
                 "tool_context": tool_contexts,
                 "output": text,
             }
@@ -90,7 +99,7 @@ def run_agent(
     # If no generate step was found, return context only
     return {
         "agent": blueprint.name,
-        "input": user_input,
+        "input": input_text or "",
         "tool_context": tool_contexts,
         "output": "",
         "warning": "No generate step in plan.",
