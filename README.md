@@ -36,6 +36,12 @@ agentlab run blueprints/summarizer.yaml \
 # 4) Run its evaluations
 agentlab eval blueprints/summarizer.yaml
 ```
+### CLI Flags
+- `--strip-think` (run): remove `<think>…</think>` tags from final output.
+- `--no-strip-think` (eval): by default eval strips; use this to disable.
+- `--junit <path>` (eval): write JUnit XML report.
+- `--temperature`, `--top-p`: generation controls (default 0 and 1 for determinism).
+
 
 ## Example: Incident Triage Agent
 Run a second example focused on operations-style summaries.
