@@ -3,6 +3,20 @@ from __future__ import annotations
 from typing import Any, Dict
 
 
+def _lookup_variable(path: str, variables: Dict[str, Any]) -> Any:
+    """Resolve dotted paths like 'a.b.c' within variables dict; fallback to raw marker."""
+    if path in variables:
+        return variables[path]
+    parts = path.split(".")
+    cur: Any = variables
+    for part in parts:
+        if isinstance(cur, dict) and part in cur:
+            cur = cur[part]
+        else:
+            return f"{{{{{path}}}}}"
+    return cur
+
+
 def render_template(template: str, variables: Dict[str, Any]) -> str:
     """Very small and safe curly-brace template renderer.
 
@@ -23,7 +37,7 @@ def render_template(template: str, variables: Dict[str, Any]) -> str:
             result.append(template[start:])
             break
         key = template[start + 2 : end].strip()
-        value = variables.get(key, f"{{{{{key}}}}}")
+        value = _lookup_variable(key, variables)
         result.append(str(value))
         i = end + 2
     return "".join(result)
