@@ -47,6 +47,13 @@ def run_agent(
 
     for step in blueprint.plan:
         if step.kind == "tool_use":
+            # Ensure plugin tools are discoverable each run (lazy import to avoid mypy attr issues)
+            try:
+                from .tools.registry import load_plugin_tools as _load_plugin_tools
+
+                _load_plugin_tools()
+            except Exception:
+                pass
             rendered_args = render_mapping(
                 step.with_ or {"input": user_input}, {"input": user_input}
             )
