@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def render_template(template: str, variables: Dict[str, Any]) -> str:
@@ -38,9 +38,14 @@ def render_mapping(mapping: Dict[str, Any], variables: Dict[str, Any]) -> Dict[s
         elif isinstance(v, dict):
             rendered[k] = render_mapping(v, variables)
         elif isinstance(v, list):
-            rendered[k] = [render_mapping(i, variables) if isinstance(i, dict) else (render_template(i, variables) if isinstance(i, str) else i) for i in v]
+            rendered[k] = [
+                (
+                    render_mapping(i, variables)
+                    if isinstance(i, dict)
+                    else (render_template(i, variables) if isinstance(i, str) else i)
+                )
+                for i in v
+            ]
         else:
             rendered[k] = v
     return rendered
-
-
