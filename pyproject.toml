@@ -22,3 +22,7 @@ dependencies = [
 
 [project.scripts]
 agentlab = "agentlab.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["agentlab*"]
+exclude = ["tests*", "outputs*", "blueprints*"]
