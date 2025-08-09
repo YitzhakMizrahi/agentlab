@@ -1,16 +1,19 @@
 ## agentlab/cli.py
 
 from __future__ import annotations
+
 import json
 from pathlib import Path
+
 import typer
 from rich import print
 from rich.console import Console
+from rich.live import Live
 from rich.panel import Panel
 
 from .config_loader import load_blueprint
-from .runner import run_agent
 from .evaluator import run_evaluations
+from .runner import run_agent
 
 app = typer.Typer(add_completion=False, help="AgentLab CLI")
 console = Console()
@@ -25,9 +28,17 @@ def run(
 ):
     """Run a single agent from a blueprint."""
     bp = load_blueprint(blueprint)
-    result = run_agent(bp, input_text=input_text, model_name=model, stream=stream)
-    console.print(Panel.fit("[bold]Result[/bold]"))
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    if stream:
+        # Display incremental output while the agent runs
+        with Live(refresh_per_second=8, console=console) as live:
+            # Run once; our run_agent handles streaming accumulation
+            result = run_agent(bp, input_text=input_text, model_name=model, stream=True)
+            live.update(Panel.fit("[bold]Result[/bold]"))
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        result = run_agent(bp, input_text=input_text, model_name=model, stream=False)
+        console.print(Panel.fit("[bold]Result[/bold]"))
+        print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
 @app.command()
