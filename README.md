@@ -27,4 +27,7 @@ agentlab eval blueprints/summarizer.yaml
 ## Roadmap (Phased)
 - Phase 1 (MVP): CLI, YAML config, Ollama, mocks, eval harness ✅
 - Phase 2: Tool SDK + OpenAPI ingester, richer evaluators, prompt templates
-- Phase 3: Visual designer (Next.js), agent graphs, export to xpander/LangChain
+- Phase 3: Visual designer (Next.js), agent graphs, export to LangChain
+
+## Plugins / Tools
+See `docs/plugins.md` for how to create and publish external tools via entry points.
