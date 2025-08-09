@@ -1,7 +1,8 @@
 from pathlib import Path
+
 from agentlab.config_loader import load_blueprint
-from agentlab.runner import run_agent
 from agentlab.evaluator import run_evaluations
+from agentlab.runner import run_agent
 
 
 def make_blueprint(tmp_path: Path) -> Path:
@@ -54,5 +55,3 @@ def test_evaluator(monkeypatch, tmp_path: Path):
     summary = run_evaluations(bp)
     assert summary["total"] == 1
     assert summary["passed"] == 1
-
-
