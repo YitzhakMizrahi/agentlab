@@ -26,7 +26,14 @@ agentlab eval blueprints/summarizer.yaml
 
 ## Roadmap (Phased)
 - Phase 1 (MVP): CLI, YAML config, Ollama, mocks, eval harness ✅
-- Phase 2: Tool SDK + OpenAPI ingester, richer evaluators, prompt templates
+- Phase 2 (in progress):
+  - [x] Tool SDK (entry points, registry, example plugin)
+  - [x] Streaming output (CLI --stream)
+  - [x] Structured inputs (CLI --input-json/--input-file)
+  - [x] CI + pre-commit (ruff, mypy, pytest)
+  - [ ] OpenAPI ingester for tools
+  - [ ] Richer evaluators (contains/regex/any-of/JSONPath, JUnit report)
+  - [ ] Prompt templates/patterns
 - Phase 3: Visual designer (Next.js), agent graphs, export to LangChain
 
 ## Plugins / Tools
