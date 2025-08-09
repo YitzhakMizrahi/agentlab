@@ -14,7 +14,7 @@ class ToolRef(BaseModel):
 class PlanStep(BaseModel):
     kind: Literal["tool_use", "generate", "note"] = Field(alias="step")
     name: Optional[str] = None  # tool name for tool_use or generator name for generate
-    with: Optional[Dict[str, Any]] = None  # additional args
+    with_: Optional[Dict[str, Any]] = Field(default=None, alias="with")  # additional args
 
     model_config = {
         "populate_by_name": True,
