@@ -64,4 +64,30 @@ python -m agentlab.cli run blueprints/math.yaml -i "unused here"
 
 AgentLab will auto-discover plugin tools at runtime. If the tool is not found, verify your plugin is installed and that the entry point names match the tool names used in the blueprint.
 
+## Referencing inputs in tool args
+- Use `{{input}}` to reference the raw string input (from `-i/--input`).
+- For structured inputs (dicts), you can reference keys with dot paths, e.g. `{{user.name}}` or `{{event.payload.id}}`.
+
+Example:
+```yaml
+plan:
+  - step: tool_use
+    name: add
+    with:
+      x: "{{metrics.current}}"
+      y: 7
+  - step: generate
+```
+
+Run with structured input:
+```bash
+python -m agentlab.cli run blueprints/math.yaml \
+  --input-json '{"metrics": {"current": 5}}'
+```
+
+Or load from a file:
+```bash
+python -m agentlab.cli run blueprints/math.yaml --input-file payload.json
+```
+
 
