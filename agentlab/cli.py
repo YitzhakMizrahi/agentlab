@@ -23,20 +23,30 @@ console = Console()
 def run(
     blueprint: Path = typer.Argument(..., exists=True, help="Path to agent blueprint YAML"),
     input_text: str = typer.Option(None, "--input", "-i", help="Optional single input payload"),
+    input_json: str = typer.Option(
+        None, "--input-json", help="JSON string payload to pass to agent"
+    ),
+    input_file: Path = typer.Option(None, "--input-file", help="Path to JSON file payload"),
     model: str = typer.Option("qwen3:8b", "--model", help="Ollama model name"),
     stream: bool = typer.Option(False, "--stream", help="Stream output from LLM if supported"),
 ):
     """Run a single agent from a blueprint."""
     bp = load_blueprint(blueprint)
+    # Determine payload precedence: file > json > text
+    payload = input_text
+    if input_json:
+        payload = json.loads(input_json)
+    if input_file:
+        payload = json.loads(Path(input_file).read_text(encoding="utf-8"))
     if stream:
         # Display incremental output while the agent runs
         with Live(refresh_per_second=8, console=console) as live:
             # Run once; our run_agent handles streaming accumulation
-            result = run_agent(bp, input_text=input_text, model_name=model, stream=True)
+            result = run_agent(bp, input_text=payload, model_name=model, stream=True)
             live.update(Panel.fit("[bold]Result[/bold]"))
             print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
-        result = run_agent(bp, input_text=input_text, model_name=model, stream=False)
+        result = run_agent(bp, input_text=payload, model_name=model, stream=False)
         console.print(Panel.fit("[bold]Result[/bold]"))
         print(json.dumps(result, indent=2, ensure_ascii=False))
 
