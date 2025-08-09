@@ -1,0 +1,35 @@
+# Bytecode and caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build/system artifacts
+*.egg-info/
+agentlab.egg-info/
+dist/
+build/
+
+# OS files
+.DS_Store
+
+# Project outputs
+outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+
+# Output + logs
+outputs/
+*.log
+
+# IDE
+.vscode/
+.idea/
