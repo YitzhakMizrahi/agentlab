@@ -26,6 +26,7 @@ def test_ingest_registers_tools(tmp_path: Path, monkeypatch):
     assert get_tool("pet.listPets") is not None
 
     # Exercise the tool call with mock transport
+    import agentlab.tools.openapi.ingest as ing
     import agentlab.tools.runtime.http_tool as rt
 
     client = httpx.Client(transport=MockTransport())
@@ -34,7 +35,8 @@ def test_ingest_registers_tools(tmp_path: Path, monkeypatch):
     def http_call_with_client(method: str, base_url: str, path: str, **kwargs: Any) -> str:
         return rt.http_call(method, base_url, path, client=client, **kwargs)
 
-    monkeypatch.setattr(rt, "http_call", http_call_with_client)
+    # Patch where the closure resolves from (ingest module)
+    monkeypatch.setattr(ing, "http_call", http_call_with_client)
 
     tool = get_tool("pet.listPets")
     assert tool is not None
