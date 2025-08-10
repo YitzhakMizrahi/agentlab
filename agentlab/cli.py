@@ -14,6 +14,7 @@ from rich.panel import Panel
 from .config_loader import load_blueprint
 from .evaluator import run_evaluations
 from .runner import run_agent
+from .scaffold import create_blueprint_scaffold
 
 app = typer.Typer(add_completion=False, help="AgentLab CLI")
 console = Console()
@@ -85,6 +86,19 @@ def eval(
     summary = run_evaluations(bp, model, not no_strip_think, str(junit) if junit else None)
     console.print(Panel.fit("[bold]Evaluation Summary[/bold]"))
     print(json.dumps(summary, indent=2, ensure_ascii=False))
+
+
+@app.command()
+def init(
+    name: str = typer.Argument(..., help="Blueprint name (slug will be derived)"),
+    out: Path = typer.Option(Path("blueprints"), "--out", help="Output directory"),
+    tests: bool = typer.Option(False, "--tests", help="Also create a basic test file"),
+    force: bool = typer.Option(False, "--force", help="Overwrite existing files"),
+):
+    """Scaffold a new blueprint (and optional test)."""
+    statuses = create_blueprint_scaffold(name=name, out_dir=out, with_tests=tests, force=force)
+    console.print(Panel.fit("[bold]Scaffold[/bold]"))
+    print(json.dumps([{str(p): s} for p, s in statuses], indent=2))
 
 
 if __name__ == "__main__":
