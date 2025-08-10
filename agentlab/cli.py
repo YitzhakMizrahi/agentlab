@@ -15,6 +15,7 @@ from .config_loader import load_blueprint
 from .evaluator import run_evaluations
 from .runner import run_agent
 from .scaffold import create_blueprint_scaffold
+from .tools.openapi.ingest import ingest_openapi
 
 app = typer.Typer(add_completion=False, help="AgentLab CLI")
 console = Console()
@@ -35,9 +36,21 @@ def run(
     strip_think: bool = typer.Option(
         False, "--strip-think", help="Strip <think> tags from outputs"
     ),
+    openapi_spec: str = typer.Option(
+        None, "--openapi-spec", help="Optional OpenAPI spec URL or file to ingest before run"
+    ),
+    openapi_tag: str = typer.Option(
+        "api", "--openapi-tag", help="Tag/prefix for tools from --openapi-spec"
+    ),
+    openapi_base_url: str = typer.Option(
+        None, "--openapi-base-url", help="Override base URL when ingesting --openapi-spec"
+    ),
 ):
     """Run a single agent from a blueprint."""
     bp = load_blueprint(blueprint)
+    # Optional: ingest OpenAPI tools in-process so they are available to the run
+    if openapi_spec:
+        ingest_openapi(openapi_spec, tag=openapi_tag, base_url_override=openapi_base_url)
     # Determine payload precedence: file > json > text
     payload = input_text
     if input_json:
@@ -79,9 +92,20 @@ def eval(
     no_strip_think: bool = typer.Option(
         False, "--no-strip-think", help="Do not strip <think> tags from outputs"
     ),
+    openapi_spec: str = typer.Option(
+        None, "--openapi-spec", help="Optional OpenAPI spec URL or file to ingest before eval"
+    ),
+    openapi_tag: str = typer.Option(
+        "api", "--openapi-tag", help="Tag/prefix for tools from --openapi-spec"
+    ),
+    openapi_base_url: str = typer.Option(
+        None, "--openapi-base-url", help="Override base URL when ingesting --openapi-spec"
+    ),
 ):
     """Run the blueprint's evaluation cases and report pass/fail."""
     bp = load_blueprint(blueprint)
+    if openapi_spec:
+        ingest_openapi(openapi_spec, tag=openapi_tag, base_url_override=openapi_base_url)
     # Positional call keeps typing simple across mypy versions
     summary = run_evaluations(bp, model, not no_strip_think, str(junit) if junit else None)
     console.print(Panel.fit("[bold]Evaluation Summary[/bold]"))
@@ -99,6 +123,18 @@ def init(
     statuses = create_blueprint_scaffold(name=name, out_dir=out, with_tests=tests, force=force)
     console.print(Panel.fit("[bold]Scaffold[/bold]"))
     print(json.dumps([{str(p): s} for p, s in statuses], indent=2))
+
+
+@app.command()
+def openapi(
+    spec: Path = typer.Argument(..., exists=True, help="Path to OpenAPI spec (yaml/json)"),
+    tag: str = typer.Option("api", "--tag", help="Prefix/tag for generated tools"),
+    base_url: str = typer.Option(None, "--base-url", help="Override base URL from spec"),
+):
+    """Ingest a simple OpenAPI spec and register tools at runtime."""
+    registered = ingest_openapi(spec, tag=tag, base_url_override=base_url)
+    console.print(Panel.fit("[bold]OpenAPI Tools Registered[/bold]"))
+    print(json.dumps(registered, indent=2))
 
 
 if __name__ == "__main__":
