@@ -1,0 +1,17 @@
+name: demo
+description: A starter agent created by agentlab init.
+system_prompt: |
+  You are a precise assistant. Produce a short, direct answer.
+
+tools: []
+
+memory:
+  strategy: short_term
+
+plan:
+  - step: generate
+    name: final
+
+evaluation:
+  - input: "Sample input here"
+    expected: "sample"
