@@ -103,5 +103,17 @@ evaluation:
 ## Plugins / Tools
 See `docs/plugins.md` for how to create and publish external tools via entry points.
 
+### OpenAPI Tools (MVP)
+Ingest an OpenAPI spec and register tools at runtime (supports URL or file):
+
+```bash
+# Live Swagger Petstore demo
+agentlab run blueprints/petstore.yaml -i "" \
+  --openapi-spec https://petstore3.swagger.io/api/v3/openapi.json \
+  --openapi-tag pet \
+  --openapi-base-url https://petstore3.swagger.io/api/v3 \
+  --model qwen3:8b
+```
+
 ## License
 MIT
