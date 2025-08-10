@@ -36,6 +36,18 @@ agentlab run blueprints/summarizer.yaml \
 # 4) Run its evaluations
 agentlab eval blueprints/summarizer.yaml
 ```
+
+### Scaffold a new blueprint
+```bash
+# Create a new blueprint (and an optional test)
+agentlab init my-agent --out blueprints --tests
+
+# Run it
+agentlab run blueprints/my-agent.yaml -i "Sample input" --model qwen3:8b
+
+# Run its evaluation cases
+agentlab eval blueprints/my-agent.yaml --model qwen3:8b
+```
 ### CLI Flags
 - `--strip-think` (run): remove `<think>…</think>` tags from final output.
 - `--no-strip-think` (eval): by default eval strips; use this to disable.
